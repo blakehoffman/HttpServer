@@ -1,5 +1,9 @@
 package http
 
+import (
+	"strings"
+)
+
 const MaxHttpStatusLineLength = 1024
 
 const (
@@ -15,9 +19,9 @@ type requestLine struct {
 }
 
 type HttpParseResult[T any] struct {
-	Result T
-	LastByte byte
-	Completed bool
+	result T
+	lastByte byte
+	completed bool
 }
 
 func get_status_line_parse_location(lastByte byte, requestLine requestLine) int{
@@ -44,7 +48,17 @@ func get_status_line_parse_location(lastByte byte, requestLine requestLine) int{
 
 func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLine]) HttpParseResult[requestLine] {
 	var httpRequestLine requestLine
-	parseLocation := get_status_line_parse_location(parseResult.LastByte, parseResult.Result)
+	var dataStringBuilder strings.Builder
+	parseLocation := get_status_line_parse_location(parseResult.lastByte, parseResult.result)
+
+	// if part of the string was written from the last call to this method, make sure to concatenate it
+	if parseLocation == InVerb && parseResult.result.verb != ""{
+		dataStringBuilder.WriteString(parseResult.result.verb)
+	} else if parseLocation == InUrl && parseResult.result.url != ""{
+		dataStringBuilder.WriteString(parseResult.result.url)
+	} else if parseLocation == InVersion && parseResult.result.version != ""{
+		dataStringBuilder.WriteString(parseResult.result.version)
+	}
 
 	for i := 0; i <= len(buffer); i++ {
 		/* the buffer is initialized with zeros. If we find a zero, return because we
@@ -53,12 +67,12 @@ func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLi
 		*/
 		if buffer[i] == 0{
 			return HttpParseResult[requestLine]{
-				Result: httpRequestLine,
-				LastByte: 0,
+				result: httpRequestLine,
+				lastByte: 0,
 			}
 		}
 
-
+		
 	}
 
 	return HttpParseResult[requestLine]{
