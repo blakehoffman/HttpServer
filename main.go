@@ -29,20 +29,6 @@ func main() {
 }
 
 func processClient(connection net.Conn){
+	
 	defer connection.Close()
-
-	buffer := make([]byte, 1024)
-	length, error := connection.Read(buffer)
-
-	if error != nil{
-		fmt.Println("Error reading buffer", error.Error())
-	}
-
-	fmt.Println("Received x bytes: ", length)
-
-	_, error = connection.Write([]byte("Hello world"))
-
-	if error != nil{
-		fmt.Println("Error writing to client")
-	}
 }

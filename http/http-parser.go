@@ -10,6 +10,7 @@ const (
 	InVerb int = iota
 	InUrl
 	InVersion
+	AtEnd
 )
 
 type requestLine struct {
@@ -49,6 +50,7 @@ func get_status_line_parse_location(lastByte byte, requestLine requestLine) int{
 func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLine]) HttpParseResult[requestLine] {
 	var httpRequestLine requestLine
 	var dataStringBuilder strings.Builder
+	var lastByte byte
 	parseLocation := get_status_line_parse_location(parseResult.lastByte, parseResult.result)
 
 	// if part of the string was written from the last call to this method, make sure to concatenate it
@@ -61,22 +63,35 @@ func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLi
 	}
 
 	for i := 0; i <= len(buffer); i++ {
+		currentByte := buffer[i]
 		/* the buffer is initialized with zeros. If we find a zero, return because we
 		   know we've hit the end of the message within the buffer since we are hitting
 		   the default values
 		*/
-		if buffer[i] == 0{
+		if currentByte == 0{
 			return HttpParseResult[requestLine]{
 				result: httpRequestLine,
 				lastByte: 0,
 			}
 		}
-
 		
+		if currentByte == ' '{
+			parseLocation++
+		} else if currentByte == '\n' && lastByte == '\r'{
+			lastByte = currentByte
+			return HttpParseResult[requestLine]{
+				result: httpRequestLine,
+				lastByte: lastByte,
+			}
+		} else{
+			dataStringBuilder.WriteByte(currentByte)
+		}
+
+		lastByte = currentByte
 	}
 
 	return HttpParseResult[requestLine]{
-		Result: httpRequestLine,
-		LastByte: lastByte,
+		result: httpRequestLine,
+		lastByte: lastByte,
 	}
 }
