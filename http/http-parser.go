@@ -47,7 +47,7 @@ func get_status_line_parse_location(lastByte byte, requestLine requestLine) int{
 	}
 }
 
-func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLine]) HttpParseResult[requestLine] {
+func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLine]) (HttpParseResult[requestLine], *byte) {
 	var httpRequestLine requestLine
 	var dataStringBuilder strings.Builder
 	var lastByte byte
@@ -72,17 +72,21 @@ func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLi
 			return HttpParseResult[requestLine]{
 				result: httpRequestLine,
 				lastByte: 0,
-			}
+			}, nil
 		}
 		
 		if currentByte == ' '{
+			write_string_builder_to_request_line(parseLocation, dataStringBuilder, &httpRequestLine)
 			parseLocation++
 		} else if currentByte == '\n' && lastByte == '\r'{
 			lastByte = currentByte
+			write_string_builder_to_request_line(parseLocation, dataStringBuilder, &httpRequestLine)
+
 			return HttpParseResult[requestLine]{
 				result: httpRequestLine,
 				lastByte: lastByte,
-			}
+				completed: true,
+			}, &buffer[i]
 		} else{
 			dataStringBuilder.WriteByte(currentByte)
 		}
@@ -90,8 +94,20 @@ func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLi
 		lastByte = currentByte
 	}
 
+	write_string_builder_to_request_line(parseLocation, dataStringBuilder, &httpRequestLine)
+	
 	return HttpParseResult[requestLine]{
 		result: httpRequestLine,
 		lastByte: lastByte,
+	}, nil
+}
+
+func write_string_builder_to_request_line(parseLocation int, stringBuilder strings.Builder, requestLinePointer *requestLine) {
+	if parseLocation == InVerb{
+		requestLinePointer.verb = stringBuilder.String()
+	} else if parseLocation == InUrl{
+		requestLinePointer.url = stringBuilder.String()
+	} else if parseLocation == InVersion{
+		requestLinePointer.version = stringBuilder.String()
 	}
 }

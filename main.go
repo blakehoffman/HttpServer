@@ -29,6 +29,5 @@ func main() {
 }
 
 func processClient(connection net.Conn){
-	
 	defer connection.Close()
 }
