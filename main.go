@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"main/http"
 )
 
 func main() {
@@ -30,4 +31,5 @@ func main() {
 
 func processClient(connection net.Conn){
 	defer connection.Close()
+	http.Read_Http_Request(connection)
 }
