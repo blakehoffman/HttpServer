@@ -19,7 +19,7 @@ type requestLine struct {
 	version string
 }
 
-type HttpParseResult[T any] struct {
+type httpParseResult[T any] struct {
 	result T
 	lastByte byte
 	completed bool
@@ -47,7 +47,7 @@ func get_status_line_parse_location(lastByte byte, requestLine requestLine) int{
 	}
 }
 
-func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLine]) (HttpParseResult[requestLine], *byte) {
+func parse_http_status_line(buffer []byte, parseResult httpParseResult[requestLine]) (httpParseResult[requestLine], *byte) {
 	var httpRequestLine requestLine
 	var dataStringBuilder strings.Builder
 	var lastByte byte
@@ -69,7 +69,7 @@ func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLi
 		   the default values
 		*/
 		if currentByte == 0{
-			return HttpParseResult[requestLine]{
+			return httpParseResult[requestLine]{
 				result: httpRequestLine,
 				lastByte: 0,
 			}, nil
@@ -83,7 +83,7 @@ func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLi
 			lastByte = currentByte
 			write_string_builder_to_request_line(parseLocation, dataStringBuilder, &httpRequestLine)
 
-			return HttpParseResult[requestLine]{
+			return httpParseResult[requestLine]{
 				result: httpRequestLine,
 				lastByte: lastByte,
 				completed: true,
@@ -97,7 +97,7 @@ func parse_http_status_line(buffer []byte, parseResult HttpParseResult[requestLi
 
 	write_string_builder_to_request_line(parseLocation, dataStringBuilder, &httpRequestLine)
 	
-	return HttpParseResult[requestLine]{
+	return httpParseResult[requestLine]{
 		result: httpRequestLine,
 		lastByte: lastByte,
 	}, nil

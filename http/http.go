@@ -23,7 +23,7 @@ func Read_Http_Request(connection net.Conn) {
 		fmt.Println("Error reading buffer", error.Error())
 	}
 
-	requestLineHttpParseResult, bufferPointer := parse_http_status_line(buffer, HttpParseResult[requestLine]{})
+	requestLineHttpParseResult, bufferPointer := parse_http_status_line(buffer, httpParseResult[requestLine]{})
 
 	//continue reading from connection and parsing http status line if it didn't complete on first call to parse_http_status_line
 	for completed := requestLineHttpParseResult.completed; !completed; completed = requestLineHttpParseResult.completed {
