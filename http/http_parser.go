@@ -88,7 +88,7 @@ func parse_http_status_line(buffer []byte, parseResult httpParseResult[requestLi
 				lastByte: lastByte,
 				completed: true,
 			}, &buffer[i]
-		} else{
+		} else if currentByte != '\n' && currentByte != '\r'{
 			dataStringBuilder.WriteByte(currentByte)
 		}
 
