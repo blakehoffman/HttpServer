@@ -13,10 +13,20 @@ const (
 	AtEnd
 )
 
+type httpHeader struct {
+	name  string
+	value string
+}
+
 type requestLine struct {
 	verb    string
 	url     string
 	version string
+}
+
+type httpParseHeadersResult struct {
+	httpParseResult[[]httpHeader]
+	atNewHeader bool
 }
 
 type httpParseResult[T any] struct {
@@ -46,6 +56,10 @@ func get_status_line_parse_location(lastByte byte, requestLine requestLine) int 
 		return InVerb
 	}
 }
+
+func parse_http_headers(buffer []byte, parseResult httpParseHeadersResult) (httpParseHeadersResult, *byte) {
+	return httpParseHeadersResult{}, nil
+} 
 
 func parse_http_status_line(buffer []byte, parseResult httpParseResult[requestLine]) (httpParseResult[requestLine], *byte) {
 	var dataStringBuilder strings.Builder
